@@ -1,7 +1,7 @@
 import speech_recognition as sr
 import pyttsx3
 import wolframalpha
-import time
+import wikipedia
 
 class TS_engine:
     def __init__(self):
@@ -63,20 +63,27 @@ class TS_engine:
         echotxt = 'Did you say - ' + mictext + '?'
         self.sayTTS(echotxt)
 
-    def QtoAwolframalpha(self):
-        question = self.txtSTTmic()
+    def QtoAquery(self, question):
         if question != None:
             print(question)
             try:
                 res = self.client.query(question)
                 ans = next(res.results).text
             except:
+                res = wikipedia.page(question)
+                res_lines = (res.content).split('.')
+                ans = res_lines[0] + '. ' + res_lines[1]
+            else:
                 ans = 'the question was not clear'
         else:
             ans = 'unknown error occured'
         print(ans)
-        self.sayTTS(ans)
+        return ans
 
+    def voiceQuery(self):
+        question = self.txtSTTmic()
+        ans = self.QtoAquery(question)
+        self.sayTTS(ans)
 
 def main():
     ts = TS_engine()
@@ -84,10 +91,11 @@ def main():
     #ts.echoMicSpeech()
     while True:
         ts.sayTTS('Ask me a question')
-        ts.QtoAwolframalpha()
-        ts.sayTTS('would you like to ask again?')
+        ts.voiceQuery()
+        ts.sayTTS('would you like to ask another question?')
         qa = ts.txtSTTmic()
         if (qa == 'no')|(qa == None):
+            ts.sayTTS('Alright! See you later.')
             break
 
 
